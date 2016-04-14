@@ -1,0 +1,9 @@
+http://www.imagemagick.org/Usage/text/
+
+convert -gravity center -background white -fill black -pointsize 16 -size 100x80 caption:'This is a very long caption line.' foo.jpg
+
+convert -background white -fill black -pointsize 14 -font Courier -size 200x40 caption:'women in irreproachable toilets' foo.bmp
+
+convert -background white -fill black -pointsize 14 -font Courier -size 200x14 -threshold 58% -gravity South caption:'1234567890123456789012345' foo.bmp
+
+convert -background white -fill black -pointsize 14 -font Courier -size 100x14 -threshold 58% -gravity West -depth 8 caption:'Hello' foo2.pgm
