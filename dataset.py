@@ -1,10 +1,8 @@
 import os
 import numpy as np
 import random
-import common
 from common import INPUT_SIZE, IMG_SIZE, HEADER, TEXT_LENGTH, ALPHABET_SIZE
 
-DEFAULT_DATA_DIR = os.path.join(common.ROOT_DIR, 'data', 'imgs')
 
 TEST_RATIO = 0.04
 
@@ -83,24 +81,17 @@ def vectorize_texts(texts):
     vecs[i] = vectorize_text(text)
   return vecs
 
-def read_data_sets(datadir=None):
-  if datadir is None:
-    datadir = DEFAULT_DATA_DIR
-
+def _dataset_from_filenames(fnames, dirname):
+  n = len(fnames)
   texts = []
-  img_files = os.listdir(datadir)
-  random.seed(1337)
-  # Shuffle so we get a random train/test split
-  random.shuffle(img_files)
-  n = len(img_files)
-  img_data = np.zeros([n, IMG_SIZE], dtype=np.float32) # TODO
-  for i, fname in enumerate(img_files):
+  img_data = np.zeros([n, IMG_SIZE], dtype=np.uint8)
+  for i, fname in enumerate(fnames):
     # TODO: Refactor string sanitization
     assert fname.endswith('.pgm')
     text = fname.split('.')[0].replace('_', ' ')
     texts.append(text)
 
-    f = open(os.path.join(datadir, fname), 'rb')
+    f = open(os.path.join(dirname, fname), 'rb')
     # 14 bytes of metadata
     header = f.read(14)
 
@@ -112,11 +103,18 @@ def read_data_sets(datadir=None):
     img_data[i] = data
 
   text_data = vectorize_texts(texts)
+  return DataSet(img_data, text_data, labels=texts)
 
-  test_idx = int(n*TEST_RATIO)
+def dataset_from_dir(datadir):
+  img_files = os.listdir(datadir)
+  return _dataset_from_filenames(img_files, datadir)
 
-  test_set = DataSet(img_data[:test_idx], text_data[:test_idx],
-                     labels=texts[:test_idx])
-  train_set = DataSet(img_data[test_idx:], text_data[test_idx:])
-
-  return train_set, test_set
+def read_traintest_data(datadir):
+  img_files = os.listdir(datadir)
+  n = len(img_files)
+  random.seed(1337)
+  # Shuffle so we get a random train/test split
+  random.shuffle(img_files)
+  test_idx = int(n * TEST_RATIO)
+  return (_dataset_from_filenames(img_files[test_idx:], datadir),
+    _dataset_from_filenames(img_files[:test_idx], datadir))

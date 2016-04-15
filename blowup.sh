@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm bigoutputs/*
 for fname in `ls outputs`
 do
 	base=$(basename "$fname")
